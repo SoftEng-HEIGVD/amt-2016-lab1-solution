@@ -10,7 +10,7 @@ module.exports = function (grunt) {
 	// configure the tasks
 	var config = {
 		clean: {
-			build: { src: [ 'build/**/*' ] }
+			build: { src: [ '../docs/**/*' ] }
 		},
 
 		raml2boot: {
@@ -20,7 +20,7 @@ module.exports = function (grunt) {
       },
       apidoc: {
 	      files: {
-          'build/index.html': 'raml/api.raml'
+          '../docs/index.html': 'raml/api.raml'
         }
       }
     },
@@ -37,7 +37,7 @@ module.exports = function (grunt) {
 
 		'http-server': {
 			'dev': {
-				root: './build',
+				root: './../docs',
 				port: 4000,
 				host: host,
 				showDir: true,
@@ -46,7 +46,7 @@ module.exports = function (grunt) {
 				runInBackground: true
 			},
 			'standalone': {
-				root: './build',
+				root: './../docs',
 				port: 4000,
 				host: host,
 				showDir: true,
