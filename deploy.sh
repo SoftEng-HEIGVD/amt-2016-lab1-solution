@@ -3,7 +3,7 @@
 set -e
 
 # build
-mvn compile package
+mvn clean package
 
 # deploy
 cp target/*.war images/wildfly/standalone/deployments/
