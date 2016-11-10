@@ -1,0 +1,8 @@
+{
+  "username": [
+    "Username is already taken."
+  ],
+  "firstname": [
+    "At most 15 caracters"
+  ]
+}

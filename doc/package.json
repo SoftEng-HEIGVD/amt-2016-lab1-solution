@@ -1,0 +1,17 @@
+{
+  "name": "amt-2016-apidoc",
+  "version": "0.0.1",
+  "description": "Documentation of the API of AMT Demo",
+  "repository": "https://github.com/SoftEng-HEIGVD/amt-2016-lab1-solution",
+  "author": "Laurent Prevost, laurent.prevost@heig-vd.ch",
+  "devDependencies": {
+    "debug": "0.8.1",
+    "grunt": "0.4.5",
+    "grunt-contrib-clean": "0.6.0",
+    "grunt-contrib-watch": "0.6.1",
+    "grunt-http-server": "1.3.0",
+    "grunt-raml2boot": "0.1.1",
+    "underscore": "1.6.0",
+    "underscore.string": "3.0.3"
+  }
+}

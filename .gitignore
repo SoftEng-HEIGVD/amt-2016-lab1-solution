@@ -1,0 +1,9 @@
+*.iml
+.idea
+
+lib
+
+target
+*.war
+
+doc/node_modules

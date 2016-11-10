@@ -1,0 +1,30 @@
+#%RAML 0.8
+---
+title: AMT Demo
+baseUri: "{domain}/api"
+version: v1
+protocols: [HTTPS]
+mediaType: application/json
+
+# Not used yet! It's planed for next version
+#securitySchemes:
+#  - jwt:
+#      description: JSON Web Token authentication.
+#      type: "x-{jwt}"
+
+resourceTypes:
+  - collection: !include raml/resourceTypes/collection.raml
+  - member: !include raml/resourceTypes/member.raml
+
+schemas:
+  - errors: !include raml/schemas/errors.json
+  - user-get: !include raml/schemas/users/response-get.json
+  - user-patch: !include raml/schemas/users/request-patch.json
+  - user-post: !include raml/schemas/users/request-post.json
+  - user-getAll: !include raml/schemas/users/response-array-get.json
+
+# Not used yet! It's planed for next version
+#traits:
+#  - auth: !include raml/traits/authentication.raml
+
+/users: !include raml/resources/users.raml
