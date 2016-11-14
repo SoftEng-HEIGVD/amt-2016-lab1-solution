@@ -208,6 +208,8 @@ In our simple application, we do not have a lot of business logic. But we can co
 
 So, in our application, we the `ISecurityService` with its implementation `SecurityService` that offers two methods `checkCredentials` and `hashPassword`. The first method validate that the credentials given by a user are valid and the second is used to hash a clear password.
 
+In addition, we have the `IMessageService/MessageService` which a `@Singleton` session bean. This service aims to provide a mechanism to let the possibility to transfer messages between two HTTP requests without using with the HTTP session. This also a use case to demonstrate the `singleton` pattern in such application.
+
 ### DAO/Managers
 
 In this demo application, we have a link to a MySQL database. We directly use JDBC driver to do our queries to the database. JPA was not an option for the students as they do not learned the subject before the lab deadline.
