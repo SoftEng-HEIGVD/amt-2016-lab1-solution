@@ -12,6 +12,12 @@ public class UserWriteDto extends UserReadDto {
   private String passwordConfirmation;
 
   /**
+   * Required for Jackson serialization for incoming requests
+   */
+  public UserWriteDto() {
+  }
+  
+  /**
    * Constructor for new user
    * 
    * @param password The password

@@ -1,6 +1,6 @@
 package ch.heigvd.amt.prl.lab1.validation;
 
-import ch.heigvd.amt.prl.lab1.dto.FieldsErrorsDto;
+import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import ch.heigvd.amt.prl.lab1.dto.IDto;
 
 /**
@@ -16,7 +16,7 @@ public interface IValidationService<T extends IDto> {
    * @param dto The DTO to validate
    * @return The errors, empty errors if no error
    */
-  FieldsErrorsDto validateCreation(T dto);
+  ErrorDto validateCreation(T dto);
   
   /**
    * Validate a model for the modification
@@ -24,5 +24,5 @@ public interface IValidationService<T extends IDto> {
    * @param dto The DTO to validate
    * @return The errors, empty errors if no error
    */
-  FieldsErrorsDto validateModification(T dto);
+  ErrorDto validateModification(T dto);
 }

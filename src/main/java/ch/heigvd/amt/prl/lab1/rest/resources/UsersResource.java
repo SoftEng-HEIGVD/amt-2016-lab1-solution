@@ -1,7 +1,7 @@
 package ch.heigvd.amt.prl.lab1.rest.resources;
 
 import ch.heigvd.amt.prl.lab1.dao.IUserDao;
-import ch.heigvd.amt.prl.lab1.dto.FieldsErrorsDto;
+import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import ch.heigvd.amt.prl.lab1.dto.UserReadDto;
 import ch.heigvd.amt.prl.lab1.dto.UserWriteDto;
 import ch.heigvd.amt.prl.lab1.models.User;
@@ -79,10 +79,10 @@ public class UsersResource extends AbstractResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response create(UserWriteDto userToCreate) {
     // Validate the user inputs
-    FieldsErrorsDto errors = userValidationService.validateCreation(userToCreate);
+    ErrorDto error = userValidationService.validateCreation(userToCreate);
 
     // Check if there is any error
-    if (errors.isEmpty()) {
+    if (error.isEmpty()) {
       // Create the user and set the hashed password
       User user = toUser(userToCreate);
       user.setHashedPassword(securityService.hashPassword(userToCreate.getPassword()));
@@ -98,16 +98,17 @@ public class UsersResource extends AbstractResource {
       }
     }
     else {
-      return validationError(errors);
+      return validationError(error);
     }
   }
 
   @PATCH
   @Path("/{id}")
   @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response update(@PathParam("id") long id, UserWriteDto userToUpdate) {
     // Validate the user inputs
-    FieldsErrorsDto errors = userValidationService.validateModification(userToUpdate);
+    ErrorDto errors = userValidationService.validateModification(userToUpdate);
     
     // Check if there is any error
     if (errors.isEmpty()) {

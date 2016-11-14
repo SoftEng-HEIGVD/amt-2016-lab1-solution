@@ -2,7 +2,7 @@ package ch.heigvd.amt.prl.lab1.web.servlets;
 
 
 import ch.heigvd.amt.prl.lab1.dao.IUserDao;
-import ch.heigvd.amt.prl.lab1.dto.FieldsErrorsDto;
+import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import ch.heigvd.amt.prl.lab1.dto.UserWriteDto;
 import ch.heigvd.amt.prl.lab1.models.User;
 import ch.heigvd.amt.prl.lab1.services.ISecurityService;
@@ -71,7 +71,7 @@ public class ProfileServlet extends RegisterServlet {
     }
     
     // Validates the inputs
-    FieldsErrorsDto errors = userValidationService.validateModification(userDto);
+    ErrorDto errors = userValidationService.validateModification(userDto);
     
     // No errors, update the user
     if (errors.isEmpty()) {

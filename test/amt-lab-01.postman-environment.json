@@ -1,0 +1,28 @@
+{
+  "id": "a60e4260-afc2-bdca-13e8-60676d8611a7",
+  "name": "AMT",
+  "values": [
+    {
+      "key": "host",
+      "value": "192.168.99.100",
+      "type": "text",
+      "enabled": true
+    },
+    {
+      "key": "port",
+      "value": "9090",
+      "type": "text",
+      "enabled": true
+    },
+    {
+      "key": "contextRoot",
+      "value": "AmtDemoProject-1.0-SNAPSHOT",
+      "type": "text",
+      "enabled": true
+    }
+  ],
+  "timestamp": 1479120674700,
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2016-11-14T10:51:16.241Z",
+  "_postman_exported_using": "Postman/4.8.3"
+}

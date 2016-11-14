@@ -1,6 +1,6 @@
 package ch.heigvd.amt.prl.lab1.rest.providers;
 
-import ch.heigvd.amt.prl.lab1.dto.FieldsErrorsDto;
+import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -15,7 +15,7 @@ import javax.ws.rs.ext.Provider;
 public class UnrecognizedPropertyExceptionMapper implements ExceptionMapper<UnrecognizedPropertyException> {
   @Override
   public Response toResponse(UnrecognizedPropertyException exception) {
-    FieldsErrorsDto errors = new FieldsErrorsDto();
+    ErrorDto errors = new ErrorDto();
     
     errors.addErrorMessage(exception.getPropertyName(), "is not allowed.");
     

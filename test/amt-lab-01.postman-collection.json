@@ -1,0 +1,670 @@
+{
+	"variables": [],
+	"info": {
+		"name": "AMTLab1",
+		"_postman_id": "4246f4f3-7ed8-2406-001b-2bea51e8a430",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "prepareUsernameSuffix",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"var userRegexp = /(.*)-(\\d)/;",
+							"",
+							"// This will be used to make all the test working independently if there is data or not on the tested environment",
+							"var usernameSuffix = 1;",
+							"",
+							"for (var i = 0; i < data.length; i++) {",
+							"    var match = userRegexp.exec(data[i].username);",
+							"    if (match && match[1] == \"hdupont\") {",
+							"        var userSuffix = parseInt(match[2]);",
+							"        if (userSuffix > usernameSuffix) {",
+							"            usernameSuffix = userSuffix;",
+							"        }",
+							"    }",
+							"}",
+							"",
+							"usernameSuffix++;",
+							"",
+							"postman.setGlobalVariable(\"usernameSuffix\", usernameSuffix);",
+							"",
+							"postman.setNextRequest(\"createValidUser\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
+				},
+				"description": "Get all users"
+			},
+			"response": []
+		},
+		{
+			"name": "createValidUser",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 201\"] = responseCode.code === 201;",
+							"tests[\"Location is present\"] = responseHeaders.hasOwnProperty(\"Location\");",
+							"",
+							"var urlTokens = postman.getResponseHeader(\"Location\").split(\"/\");",
+							"postman.setGlobalVariable(\"userId\", urlTokens[urlTokens.length - 1]);",
+							"",
+							"postman.setNextRequest(\"getUsers\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"validUsername\", \"hdupont-\" + postman.getGlobalVariable(\"usernameSuffix\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{validUsername}}\",\n\t\"firstname\": \"Henri\",\n\t\"lastname\": \"Dupont\",\n\t\"password\": \"test\",\n\t\"passwordConfirmation\": \"test\"\n}"
+				},
+				"description": "Create new user"
+			},
+			"response": []
+		},
+		{
+			"name": "getUsers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"List of users is not empty\"] = data.length > 0;",
+							"",
+							"tests[\"An element of the users lists has an id\"] = data[0].id;",
+							"tests[\"An element of the users lists has an username\"] = data[0].username;",
+							"tests[\"An element of the users lists has an firstname\"] = data[0].firstname;",
+							"tests[\"An element of the users lists has an lastname\"] = data[0].lastname;",
+							"",
+							"var createdUserId = postman.getGlobalVariable(\"userId\");",
+							"",
+							"var findCreatedUser = false;",
+							"for (var i = 0; i < data.length; i++) {",
+							"    if (data[i].id == createdUserId) {",
+							"        findCreatedUser = true;",
+							"        break;",
+							"    }",
+							"}",
+							"",
+							"tests[\"Created user is present in the collection\"] = findCreatedUser;",
+							"",
+							"postman.setNextRequest(\"getUser\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
+				},
+				"description": "Get all users"
+			},
+			"response": []
+		},
+		{
+			"name": "getUser",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"The user retrieved has the correct id\"] = data.id == postman.getGlobalVariable(\"userId\");",
+							"tests[\"The user retrieved has the correct username\"] = data.username == postman.getGlobalVariable(\"validUsername\");",
+							"tests[\"The user retrieved has the correct firstname\"] = data.firstname == \"Henri\";",
+							"tests[\"The user retrieved has the correct lastname\"] = data.lastname == \"Dupont\";",
+							"",
+							"postman.setNextRequest(\"getUserNotFound\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{userId}}",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Retrieve user details"
+			},
+			"response": []
+		},
+		{
+			"name": "getUserNotFound",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 404\"] = responseCode.code === 404;",
+							"",
+							"postman.setNextRequest(\"createDuplicatedUser\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"nonExistingUserId\", parseInt(postman.getGlobalVariable(\"userId\")) + 1);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{nonExistingUserId}}",
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Try to retrieve an non-existing user."
+			},
+			"response": []
+		},
+		{
+			"name": "createDuplicatedUser",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 422\"] = responseCode.code === 422;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"there is an error for username\"] = data.username && data.username.length == 1;",
+							"",
+							"tests[\"the error says the username is already taken\"] = data.username[0] == \"The username \" + postman.getGlobalVariable(\"validUsername\") + \" is already used.\";",
+							"",
+							"postman.setNextRequest(\"createUserWithInvalidData\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"validUsername\", \"hdupont-\" + postman.getGlobalVariable(\"usernameSuffix\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{validUsername}}\",\n\t\"firstname\": \"Henri\",\n\t\"lastname\": \"Dupont\",\n\t\"password\": \"test\",\n\t\"passwordConfirmation\": \"test\"\n}"
+				},
+				"description": "Try to create new user but an existing username is already present in the database."
+			},
+			"response": []
+		},
+		{
+			"name": "createUserWithInvalidData",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 422\"] = responseCode.code === 422;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"it should be an error for username\"] = data.username && data.username[0] == \"The username is too short. Min 3 cars.\";",
+							"tests[\"it should be an error for firstname\"] = data.firstname && data.firstname[0] == \"The firstname is too long. Max 15 cars.\";",
+							"tests[\"it should be an error for lastname\"] = data.lastname && data.lastname[0] == \"The lastname is too short. Min 3 cars.\";",
+							"tests[\"it should be an error for passwordConfirmation\"] = data.passwordConfirmation && data.passwordConfirmation[0] == \"The passsword and password confirmation does not match.\";",
+							"",
+							"postman.setNextRequest(\"createAnotherUser\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"firstname\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\n\t\"lastname\": \"\",\n\t\"password\": \"aaa\",\n\t\"passwordConfirmation\": \"bbb\"\n}"
+				},
+				"description": "Try to create a user with invalid data."
+			},
+			"response": []
+		},
+		{
+			"name": "createAnotherUser",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 201\"] = responseCode.code === 201;",
+							"",
+							"var urlTokens = postman.getResponseHeader(\"Location\").split(\"/\");",
+							"postman.setGlobalVariable(\"secondUserId\", urlTokens[urlTokens.length - 1]);",
+							"",
+							"postman.setNextRequest(\"editUserWIthAnExistingUsername\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"usernameSuffix\", parseInt(postman.getGlobalVariable(\"usernameSuffix\")) + 1);",
+							"postman.setGlobalVariable(\"secondValidUsername\", \"hdupont-\" + postman.getGlobalVariable(\"usernameSuffix\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{secondValidUsername}}\",\n\t\"firstname\": \"Henri2\",\n\t\"lastname\": \"Dupont2\",\n\t\"password\": \"test\",\n\t\"passwordConfirmation\": \"test\"\n}"
+				},
+				"description": "Create another valid user."
+			},
+			"response": []
+		},
+		{
+			"name": "editUserWIthAnExistingUsername",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 422\"] = responseCode.code === 422;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"there is an error for username\"] = data.username && data.username.length == 1;",
+							"",
+							"tests[\"the error says the username is already taken\"] = data.username[0] == \"The username \" + postman.getGlobalVariable(\"validUsername\") + \" is already used.\";",
+							"",
+							"postman.setNextRequest(\"editFirstnameWithInvalidData\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{secondUserId}}",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{validUsername}}\"\n}"
+				},
+				"description": "Try to update an existing user with another existing username."
+			},
+			"response": []
+		},
+		{
+			"name": "editFirstnameWithInvalidData",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 422\"] = responseCode.code === 422;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"it should be an error for the firstname\"] = data.firstname[0] == \"The firstname is too short. Min 3 cars.\";",
+							"",
+							"postman.setNextRequest(\"editLastnameWithInvalidData\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{secondUserId}}",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"firstname\": \"aa\"\n}"
+				},
+				"description": "Try to update firstname"
+			},
+			"response": []
+		},
+		{
+			"name": "editLastnameWithInvalidData",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 422\"] = responseCode.code === 422;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"it should be an error for the lastname\"] = data.lastname[0] == \"The lastname is too long. Max 15 cars.\";",
+							"",
+							"postman.setNextRequest(\"editUsername\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{secondUserId}}",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"lastname\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"\n}"
+				},
+				"description": "Try to update lastname"
+			},
+			"response": []
+		},
+		{
+			"name": "editUsername",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 204\"] = responseCode.code === 204;",
+							"tests[\"Location is present\"] = responseHeaders.hasOwnProperty(\"Location\");",
+							"",
+							"postman.setNextRequest(\"editPassword\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"usernameSuffix\", parseInt(postman.getGlobalVariable(\"usernameSuffix\")) + 1);",
+							"postman.setGlobalVariable(\"secondNewValidUsername\", \"hdupont-\" + postman.getGlobalVariable(\"usernameSuffix\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{secondUserId}}",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{secondNewValidUsername}}\"\n}"
+				},
+				"description": "Edit the username of an existing user."
+			},
+			"response": []
+		},
+		{
+			"name": "editPassword",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 204\"] = responseCode.code === 204;",
+							"tests[\"Location is present\"] = responseHeaders.hasOwnProperty(\"Location\");",
+							"",
+							"postman.setNextRequest(\"deleteNonExistingUser\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"usernameSuffix\", parseInt(postman.getGlobalVariable(\"usernameSuffix\")) + 1);",
+							"postman.setGlobalVariable(\"secondNewValidUsername\", \"hdupont-\" + postman.getGlobalVariable(\"usernameSuffix\"));"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{secondUserId}}",
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{secondNewValidUsername}}\"\n}"
+				},
+				"description": "Edit the password of a user."
+			},
+			"response": []
+		},
+		{
+			"name": "deleteNonExistingUser",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 404\"] = responseCode.code === 404;",
+							"",
+							"postman.setNextRequest(\"deleteUser\");"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"nonExistingUserId\", parseInt(postman.getGlobalVariable(\"usernameSuffix\")) + 100);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{nonExistingUserId}}",
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Try to delete an non-existing user."
+			},
+			"response": []
+		},
+		{
+			"name": "deleteUser",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 204\"] = responseCode.code === 204;",
+							"",
+							"postman.setNextRequest(\"deleteAlreadyDeletedUser\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{userId}}",
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Delete a user."
+			},
+			"response": []
+		},
+		{
+			"name": "deleteAlreadyDeletedUser",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 404\"] = responseCode.code === 404;",
+							""
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"nonExistingUserId\", parseInt(postman.getGlobalVariable(\"usernameSuffix\")) + 1);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/{{userId}}",
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"description": "Try to delete a user that was just deleted."
+			},
+			"response": []
+		}
+	]
+}

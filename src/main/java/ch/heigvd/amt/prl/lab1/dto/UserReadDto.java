@@ -16,6 +16,12 @@ public class UserReadDto implements IDto {
   private String lastname;
 
   /**
+   * Constructor required for Jackson serialization for incoming requests
+   */
+  protected UserReadDto() {
+  }
+  
+  /**
    * Constructor
    * 
    * @param id The user id

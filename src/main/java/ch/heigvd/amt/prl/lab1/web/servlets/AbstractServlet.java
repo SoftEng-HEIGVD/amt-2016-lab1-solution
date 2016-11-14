@@ -1,6 +1,6 @@
 package ch.heigvd.amt.prl.lab1.web.servlets;
 
-import ch.heigvd.amt.prl.lab1.dto.FieldsErrorsDto;
+import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -123,7 +123,7 @@ public abstract class AbstractServlet extends HttpServlet {
    * @throws IOException When an error occurs related to file operations
    */
   protected void error(HttpServletRequest request, HttpServletResponse response, String page, 
-    FieldsErrorsDto errors) throws ServletException, IOException {
+    ErrorDto errors) throws ServletException, IOException {
     
     request.setAttribute(JSP_ATTR_ERRORS, errors);
     forward(request, response, page);
@@ -141,7 +141,7 @@ public abstract class AbstractServlet extends HttpServlet {
    * @throws IOException When an error occurs related to file operations
    */
   protected void error(HttpServletRequest request, HttpServletResponse response, String page, 
-    String jspAttributeName, FieldsErrorsDto errors) throws ServletException, IOException {
+    String jspAttributeName, ErrorDto errors) throws ServletException, IOException {
     
     request.setAttribute(jspAttributeName, errors);
     forward(request, response, page);

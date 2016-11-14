@@ -1,12 +1,14 @@
 package ch.heigvd.amt.prl.lab1.dao.exceptions;
 
 import java.sql.SQLException;
+import javax.ejb.ApplicationException;
 
 /**
  * Any exception that occurs due to a problem with a SQL query
  * 
  * @author Laurent Prevost, laurent.prevost@heig-vd.ch
  */
+@ApplicationException
 public class QueryException extends RuntimeException{
   /**
    * Constructor to wrap any other exception

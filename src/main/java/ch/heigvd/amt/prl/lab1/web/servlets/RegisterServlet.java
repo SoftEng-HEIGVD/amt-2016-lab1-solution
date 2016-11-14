@@ -1,7 +1,7 @@
 package ch.heigvd.amt.prl.lab1.web.servlets;
 
 import ch.heigvd.amt.prl.lab1.dao.IUserDao;
-import ch.heigvd.amt.prl.lab1.dto.FieldsErrorsDto;
+import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import ch.heigvd.amt.prl.lab1.dto.UserWriteDto;
 import ch.heigvd.amt.prl.lab1.models.User;
 import ch.heigvd.amt.prl.lab1.services.ISecurityService;
@@ -50,7 +50,7 @@ public class RegisterServlet extends LoginServlet {
     );
 
     // Validate the user data
-    FieldsErrorsDto errors = userValidationService.validateCreation(userDto);
+    ErrorDto errors = userValidationService.validateCreation(userDto);
     
     // No validation errors
     if (errors.isEmpty()) {

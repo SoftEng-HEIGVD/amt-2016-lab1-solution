@@ -24,7 +24,7 @@ public class UserDao extends AbstractJdbc<User> implements IUserDao {
   private static final String QUERY_UPDATE =
     "UPDATE users SET username = ?, hashed_password = ?, first_name = ?, last_name = ? WHERE id = ?";
   
-  private static final String QUERY_DELETE = "DELETE users WHERE id = ?";
+  private static final String QUERY_DELETE = "DELETE FROM users WHERE id = ?";
   private static final String QUERY_FINDALL = "SELECT * FROM users";
   private static final String QUERY_FIND_BY_ID = "SELECT * FROM users WHERE id = ?";
   private static final String QUERY_FIND_BY_USERNAME = "SELECT * FROM users WHERE username = ?";

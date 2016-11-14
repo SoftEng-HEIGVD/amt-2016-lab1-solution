@@ -1,6 +1,6 @@
 package ch.heigvd.amt.prl.lab1.rest.resources;
 
-import ch.heigvd.amt.prl.lab1.dto.FieldsErrorsDto;
+import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import java.net.URI;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -39,7 +39,7 @@ public abstract class AbstractResource {
    * @param errors The validation errors
    * @return The response with HTTP status 422
    */
-  protected Response validationError(FieldsErrorsDto errors) {
+  protected Response validationError(ErrorDto errors) {
     return Response.status(UNPROCESSABLE_ENTITY).entity(errors).build();
   }
   

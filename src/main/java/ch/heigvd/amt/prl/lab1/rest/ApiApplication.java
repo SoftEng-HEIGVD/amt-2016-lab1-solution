@@ -1,5 +1,6 @@
 package ch.heigvd.amt.prl.lab1.rest;
 
+import java.util.Map;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 

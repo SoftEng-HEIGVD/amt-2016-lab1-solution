@@ -104,6 +104,20 @@ If for any reason you prefer to do it manually instead of running the script, yo
   docker-compose up --build
   ```
 
+## Test the Application
+
+You will find a [Postman](https://www.getpostman.com/) script in the following folder [/test](/test).
+
+There is three environment variables to configure (or you can import the environment file present in the same folder).
+
+* host: The host ip (pre-configured: 192.168.99.100)
+* port: The port (pre-configured: 9090)
+* contextRoot: The base path of the application (pre-configured: AmtDemoProject-1.0-SNAPSHOT)
+
+You should adapt the host value if you run the docker infrastructure with Docker for Mac/Windows.
+
+Once you imported the script in Postman, you should be able to run the full test suite. The script will do all the CRUD operations on the users. The script can be run on a fresh deployed application or an application running for a while.
+
 ## Application architecture
 
 ### Servlets
@@ -228,7 +242,7 @@ We have two families of DTO in this application:
   - Errors related DTOs
   - User related DTOs
 
-The `FieldsErrorsDto` and `FieldErrorsDto` are used to represent the validation errors in the API but can alse be used elsewhere. In our case, we use these DTOs in the servlets for the form user inputs validation.
+The `MessageCollectionDto` and `ErrorDto` are used to represent the validation errors in the API but can alse be used elsewhere. In our case, we use these DTOs in the servlets for the form user inputs validation.
 
 The `UserReadDto` and `UserWriteDto` are used to represent the user information in the REST API. The difference between the `read` and the `write` DTOs consist of the data that are represented. In the case of a user, we do not want to represent the password/hashedPassword in the DTOs we return in the API. And when we create/update a user we want to be able to accept a password/passwordConfirmation. Therefore, we use the `read` user DTO to output the details of the users through our API and we use the `write` user DTO to accept user details to create or update a user.
 
