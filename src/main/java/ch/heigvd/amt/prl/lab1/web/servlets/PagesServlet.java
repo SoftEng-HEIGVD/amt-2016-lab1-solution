@@ -1,8 +1,10 @@
 package ch.heigvd.amt.prl.lab1.web.servlets;
 
+import ch.heigvd.amt.prl.lab1.services.IMessageService;
 import static ch.heigvd.amt.prl.lab1.web.servlets.AbstractServlet.PAGE_ERROR_404;
 import java.io.IOException;
 import java.util.logging.Logger;
+import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -16,7 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "IndexServlet", urlPatterns = { AbstractServlet.SERVLET_PATTERN_PAGES })
 public class PagesServlet extends AbstractServlet {
   private static final Logger LOG = Logger.getLogger(PagesServlet.class.getSimpleName());
+  
+  private static final String JSP_ATTR_MSG_SERVICE = "messageService";
 
+  @EJB
+  private IMessageService messageService;
+  
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     // Retrieve the page to show
@@ -24,6 +31,9 @@ public class PagesServlet extends AbstractServlet {
     
     LOG.info(String.format("The following page was requested %s for URI %s", page, request.getRequestURI()));
 
+    // Set the message service for all the pages (request by request)
+    request.setAttribute(JSP_ATTR_MSG_SERVICE, messageService);
+    
     // Do the routing for all GET requests on the servlets
     forward(request, response, page);
   }

@@ -1,6 +1,7 @@
 package ch.heigvd.amt.prl.lab1.web.servlets;
 
 import ch.heigvd.amt.prl.lab1.models.User;
+import ch.heigvd.amt.prl.lab1.services.IMessageService;
 import ch.heigvd.amt.prl.lab1.services.ISecurityService;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -26,7 +27,7 @@ public class LoginServlet extends AbstractServlet {
   
   @EJB
   private ISecurityService securityService;
-
+  
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     String username = request.getParameter(JSP_ATTR_USERNAME);
@@ -39,7 +40,7 @@ public class LoginServlet extends AbstractServlet {
       HttpSession session = request.getSession(false);
 
       /**
-       * If a session already exists, we invlidate it to make sure there is a clean session for the current
+       * If a session already exists, we invalidate it to make sure there is a clean session for the current
        * connected user.
        */
       if (session != null) {
@@ -56,7 +57,9 @@ public class LoginServlet extends AbstractServlet {
       redirect(request, response, PATH_USERS);
     } 
     else {
-      error(request, response, PAGE_LOGIN, "Wrong credentials");
+      // Configure the username for the form and send back the generic error
+      request.setAttribute("username", username);
+      error(request, response, PAGE_LOGIN, "general", "Wrong credentials!");
     }
   }
 }

@@ -4,6 +4,7 @@ import ch.heigvd.amt.prl.lab1.dao.IUserDao;
 import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import ch.heigvd.amt.prl.lab1.dto.UserWriteDto;
 import ch.heigvd.amt.prl.lab1.models.User;
+import ch.heigvd.amt.prl.lab1.services.IMessageService;
 import ch.heigvd.amt.prl.lab1.services.ISecurityService;
 import ch.heigvd.amt.prl.lab1.validation.IUserValidationService;
 import java.io.IOException;
@@ -36,6 +37,9 @@ public class RegisterServlet extends LoginServlet {
   @EJB
   private ISecurityService securityService;
   
+  @EJB
+  private IMessageService messageService;
+  
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     /**
@@ -51,6 +55,9 @@ public class RegisterServlet extends LoginServlet {
 
     // Validate the user data
     ErrorDto errors = userValidationService.validateCreation(userDto);
+
+    // To keep the user inputs in the form
+    request.setAttribute("userForm", userDto);
     
     // No validation errors
     if (errors.isEmpty()) {
@@ -63,6 +70,9 @@ public class RegisterServlet extends LoginServlet {
       
       // If the user is correctly created we redirect the user to the login page
       if (user != null) {
+        messageService.addMessage(
+          "Great! You are now registered on this application. Login to the app and enjoy!");
+        
         redirect(request, response, PATH_LOGIN);
         return;
       }

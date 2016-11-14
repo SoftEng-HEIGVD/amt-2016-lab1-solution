@@ -1,5 +1,6 @@
 package ch.heigvd.amt.prl.lab1.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,11 @@ public class MessageCollectionDto {
     messages.add(errorMessage);
   }
 
+  @JsonIgnore
+  public boolean hasMessages() {
+    return !messages.isEmpty();
+  }
+  
   @Override
   public String toString() {
     return 

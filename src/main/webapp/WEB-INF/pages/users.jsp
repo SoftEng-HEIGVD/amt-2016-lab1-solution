@@ -63,10 +63,10 @@
             dataSrc: ""
           },
           columns: [
-            { data: "id" },
-            { data: "username" },
-            { data: "firstname" },
-            { data: "lastname" }
+            {data: "id"},
+            {data: "username"},
+            {data: "firstname"},
+            {data: "lastname"}
           ]
         });
       });

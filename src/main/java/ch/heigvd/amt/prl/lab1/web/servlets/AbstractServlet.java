@@ -58,7 +58,6 @@ public abstract class AbstractServlet extends HttpServlet {
   /**
    * JSP Attributes
    */
-  public static final String JSP_ATTR_ERROR = "error";
   public static final String JSP_ATTR_ERRORS = "errors";
   
   /**
@@ -101,14 +100,19 @@ public abstract class AbstractServlet extends HttpServlet {
    * @param request The HTTP request
    * @param response The HTTP response
    * @param page The page to redirect
+   * @param errorFieldName The field name of the error
    * @param errorMessage The error message to set for the page rendering
    * @throws ServletException When an error occurs related to the servlet execution
    * @throws IOException When an error occurs related to file operations
    */
   protected void error(HttpServletRequest request, HttpServletResponse response, String page, 
-    String errorMessage) throws ServletException, IOException {
+    String errorFieldName, String errorMessage) throws ServletException, IOException {
+
+    // Create an error DTO to be manipulated by the JSP pages
+    ErrorDto errorDto = new ErrorDto();
+    errorDto.addErrorMessage(errorFieldName, errorMessage);
     
-    request.setAttribute(JSP_ATTR_ERROR, errorMessage);
+    request.setAttribute(JSP_ATTR_ERRORS, errorDto);
     forward(request, response, page);
   }
   

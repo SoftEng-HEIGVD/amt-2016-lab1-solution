@@ -66,7 +66,7 @@ public class ProfileServlet extends RegisterServlet {
       );
     }
     else { // The operation is not valid
-      error(request, response, PAGE_PROFILE, "Unknown operation.");
+      error(request, response, PAGE_PROFILE, "general", "Unknown operation.");
       return;
     }
     
@@ -89,12 +89,20 @@ public class ProfileServlet extends RegisterServlet {
       
       // Check if the update is done
       if (userDao.update(user)) {
-        request.setAttribute(JSP_ATTR_VALID_UPDATE, 
-          "Your details or password has been successfully updated.");
+        request.setAttribute(JSP_ATTR_VALID_UPDATE, updateType);
+//          "Your details or password has been successfully updated.");
+        
+        // We make sure the user is also update in the session (probably not the same objects)
+        request.getSession(false).setAttribute(SESSION_ATTR_USER, user);
+        
+        // Finally show again the profile page
+        forward(request, response, PAGE_PROFILE);
       }
       else { // An error occured
-        error(request, response, PAGE_PROFILE, 
-          "Unable to update your details or password. Contact the administrator for more details.");
+        ErrorDto error = new ErrorDto();
+        
+        error.addErrorMessage(updateType + "General", 
+          "Unable to update your details. Contact the administrator for more details.");
       }
     }
     else {
