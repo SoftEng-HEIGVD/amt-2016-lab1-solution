@@ -301,4 +301,4 @@ We use two exception mappers in our API. These mappers helps to make the API mor
 
 Finally, we have the REST API which only define a `UsersResource` on `/api/users`. The `UsersResource` class inherits from `AbstractResource` which offers several helpers methods to build responses like not found or no content.
 
-For more details about the REST API, please read the [online API documentation](https://softeng-heigvd.github.io/amt-2016-lab1-solution/).
+For more details about the REST API, please read the <a href="https://softeng-heigvd.github.io/amt-2016-lab1-solution/" target="_blank">online API documentation</a>.
