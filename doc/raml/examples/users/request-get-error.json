@@ -1,0 +1,4 @@
+{
+  "fieldName": [ "The field uname is invalid. The available filter names are: username, firstname and lastname." ],
+  "fieldValue": [ "The field value is mandatory when the field name is specified." ]
+}

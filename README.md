@@ -235,6 +235,43 @@ In addition of the JDBC classes, there is also different exception that can be t
 
 A good example for `NoResultException` and `NonUniqueResultException` is when you want to find a record by its ID. The ID is supposed to be unique and then if there is more than one result, we have a problem. We also make the assumption that when we do a `findById` we expect to get the resulted record from the database.
 
+#### Database filtering
+
+In this section, we will present something quite over-engineered. We put in place a system to do a mapping between kind of human friendly names for data filtering to the DB column names for a model.
+
+For example, we have the model class `User` with an attribute name `firstname` which we consider human readable. We have for this model and attribute the DB column name `first_name` which we do not consider human readable and we do not want to expose directly through our API.
+
+In addition of this mappings, we also offer the possibility to easily retrieve all the filter names from a model class. This is used to do the validation of the query parameters `fieldName` and `fieldValue` for the `GET /users` for example.
+
+To achieve this goal, we created an annotation class called `FilterName` which is used on the attributes of the class `User`. Example: 
+
+```java
+public class User {
+  private long id;
+
+  @FilterName
+  private String username;
+
+  @FilterName("first_name")
+  private String firstname;
+
+  @FilterName("last_name")
+  private String lastname;
+
+  ...
+}
+```  
+
+With this approach, we can call our API like that: `GET /users?fieldName=firstname&fieldValue=bob` which will result in a SQL query like `SELECT * FROM users WHERE firstname LIKE '%bob%'`.
+
+Our mechanism can only set one filter at a time and is quite limited but it is a good demonstration of what we can do with annotations and the Java Reflexion. See that feature as an example of what can be done not for real use case to follow as we know it exists a predicate API in the Java EE world.
+
+In bonus, our mechanism prevent the SQL Injections issue as we can only use existing names which are constraints in the `AbstractJdbc` class through a validation phase.
+
+A downside of this solution at the time is that we use the attribute names of the model class which are therefore exposed directly through our API. An improvement could be done through the `FilterName` annotation with a bidirectional mapping directly specified in the annotation. In this case, the attribute names will not be exposed directly anymore.
+
+The solution in place uses 3 classes which are `Filter`, `FilterName` and `FilterUtils` (plus additional exception and mapper classes for error handling). The `FilterName` annotation has already been discussed. The `Filter` class is used to transfer the `fieldName` and `fieldValue` from the REST layer to the DAO layer. And finally, the `FilterUtils` class is used to do the logic around the Java Reflection to retrieve and validate the field names.
+
 ### Data transfer object (DTO)
 
 For the transfer objects used in the REST API, we have an interface `IDto` which is used to mark all the DTO with it. It helps to manipulate the DTOs.

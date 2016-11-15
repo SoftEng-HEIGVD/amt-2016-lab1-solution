@@ -1,5 +1,7 @@
 package ch.heigvd.amt.prl.lab1.models;
 
+import ch.heigvd.amt.prl.lab1.dao.filtering.FilterName;
+
 /**
  * User model to connect to the website.
  * 
@@ -23,8 +25,13 @@ public class User implements IModel {
   /**
    * User details
    */
+  @FilterName
   private String username;
+  
+  @FilterName("first_name")
   private String firstname;
+  
+  @FilterName("last_name")
   private String lastname;
 
   /**

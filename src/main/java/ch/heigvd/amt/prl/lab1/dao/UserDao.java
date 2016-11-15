@@ -1,6 +1,7 @@
 package ch.heigvd.amt.prl.lab1.dao;
 
 import ch.heigvd.amt.prl.lab1.dao.exceptions.NoResultException;
+import ch.heigvd.amt.prl.lab1.dao.filtering.Filter;
 import ch.heigvd.amt.prl.lab1.models.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -64,6 +65,11 @@ public class UserDao extends AbstractJdbc<User> implements IUserDao {
   @Override
   public List<User> findAll() {
     return executeReadQuery(QUERY_FINDALL);
+  }
+
+  @Override
+  public List<User> find(Filter filter) {
+    return executeReadQuery(QUERY_FINDALL, filter);
   }
 
   @Override

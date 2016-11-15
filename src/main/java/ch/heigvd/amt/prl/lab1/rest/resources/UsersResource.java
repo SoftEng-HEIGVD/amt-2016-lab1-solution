@@ -1,12 +1,14 @@
 package ch.heigvd.amt.prl.lab1.rest.resources;
 
 import ch.heigvd.amt.prl.lab1.dao.IUserDao;
+import ch.heigvd.amt.prl.lab1.dao.filtering.Filter;
 import ch.heigvd.amt.prl.lab1.dto.ErrorDto;
 import ch.heigvd.amt.prl.lab1.dto.UserReadDto;
 import ch.heigvd.amt.prl.lab1.dto.UserWriteDto;
 import ch.heigvd.amt.prl.lab1.models.User;
 import ch.heigvd.amt.prl.lab1.rest.PATCH;
 import ch.heigvd.amt.prl.lab1.services.ISecurityService;
+import ch.heigvd.amt.prl.lab1.utils.StringUtils;
 import ch.heigvd.amt.prl.lab1.validation.IUserValidationService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,13 +46,26 @@ public class UsersResource extends AbstractResource {
   /**
    * Retrieve the list of users
    *
-   * @param byUsername
+   * @param fieldName The field name for filtering
+   * @param fieldValue The value for the filtering
    * @return The list of user with read DTO form
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public List<UserReadDto> findAll(@QueryParam("byUsername") String byUsername) {
-    return userDao.findAll().stream().map(UsersResource::fromUser).collect(Collectors.toList());
+  public List<UserReadDto> findAll(@QueryParam(AbstractResource.QUERY_PARAM_FIELD_NAME) String fieldName, 
+    @QueryParam(AbstractResource.QUERY_PARAM_FIELD_VALUE) String fieldValue) {
+    
+    List<User> result;
+    
+    if (StringUtils.isEmpty(fieldName)) {
+      result = userDao.findAll();
+    }
+    else {
+      Filter filter = new Filter(User.class, fieldName, fieldValue);
+      result = userDao.find(filter);
+    }
+
+    return result.stream().map(UsersResource::fromUser).collect(Collectors.toList());
   }
 
   /**
@@ -70,7 +85,7 @@ public class UsersResource extends AbstractResource {
 
   /**
    * Create a new user
-   * 
+   *
    * @param userToCreate The user data
    * @return The response in case of success or error. Can be 201, 422 or 500
    */
@@ -92,11 +107,11 @@ public class UsersResource extends AbstractResource {
       // The user was created correctly
       if (user != null) {
         return sendCreated(this.getClass(), "find", user.getId());
-      }
+      } 
       else {
         return serverError("Unknown error");
       }
-    }
+    } 
     else {
       return validationError(error);
     }
@@ -109,27 +124,27 @@ public class UsersResource extends AbstractResource {
   public Response update(@PathParam("id") long id, UserWriteDto userToUpdate) {
     // Validate the user inputs
     ErrorDto errors = userValidationService.validateModification(userToUpdate);
-    
+
     // Check if there is any error
     if (errors.isEmpty()) {
       // Retrieve the user to update
       User user = userDao.find(id);
-      
+
       // Update the user attributes
       user = toUser(user, userToUpdate);
-      
+
       // Special case for the password as we need the security service
       if (userToUpdate.getPassword() != null) {
         user.setHashedPassword(securityService.hashPassword(userToUpdate.getPassword()));
       }
-      
+
       if (userDao.update(user)) {
         return noContent(this.getClass(), "find", user.getId());
-      }
+      } 
       else {
         return serverError("Unable to update the user due to unknown error");
       }
-    }
+    } 
     else {
       return validationError(errors);
     }
@@ -141,7 +156,7 @@ public class UsersResource extends AbstractResource {
     // Find and delete the user
     if (userDao.delete(userDao.find(id))) {
       return noContent();
-    }
+    } 
     else {
       return serverError("Unable to delete the user due to an unknown error");
     }
@@ -149,7 +164,7 @@ public class UsersResource extends AbstractResource {
 
   /**
    * Convert a user model to a user read DTO
-   * 
+   *
    * @param user The user model
    * @return The user read DTO
    */
@@ -159,7 +174,7 @@ public class UsersResource extends AbstractResource {
 
   /**
    * Convert a user write DTO to a user model
-   * 
+   *
    * @param userWriteDto The user write DTO
    * @return The user
    */
@@ -170,33 +185,31 @@ public class UsersResource extends AbstractResource {
       userWriteDto.getLastname()
     );
   }
-  
+
   /**
    * We update a user model with the value provided through the DTO
-   * 
+   *
    * @param user The user model to update
    * @param userWriteDto The user DTO with provided values
    * @return The user updated
    */
   private static User toUser(User user, UserWriteDto userWriteDto) {
     /**
-     * For each field, we check if a value is provided, if yes, we
-     * update it to the user model otherwise, we keep the original
-     * value.
+     * For each field, we check if a value is provided, if yes, we update it to the user model otherwise, we
+     * keep the original value.
      */
-    
     if (userWriteDto.getUsername() != null) {
       user.setUsername(userWriteDto.getUsername());
     }
-    
+
     if (userWriteDto.getFirstname() != null) {
       user.setFirstname(userWriteDto.getFirstname());
     }
-    
+
     if (userWriteDto.getLastname() != null) {
       user.setLastname(userWriteDto.getLastname());
     }
-    
+
     return user;
   }
 }

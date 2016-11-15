@@ -1,5 +1,6 @@
 package ch.heigvd.amt.prl.lab1.dao;
 
+import ch.heigvd.amt.prl.lab1.dao.filtering.Filter;
 import ch.heigvd.amt.prl.lab1.models.User;
 
 import javax.ejb.Local;
@@ -40,6 +41,14 @@ public interface IUserDao {
    * @return Retrieve the list of all the users
    */
   List<User> findAll();
+  
+  /**
+   * Retrieve a list of user corresponding to a simple filter
+   * 
+   * @param filter The filter to apply
+   * @return The user retrieved, empty list if no user correspond to the filter
+   */
+  List<User> find(Filter filter);
   
   /**
    * Find a user from its unique numerical ID

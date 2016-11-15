@@ -1,9 +1,13 @@
 package ch.heigvd.amt.prl.lab1.dao;
 
+import ch.heigvd.amt.prl.lab1.dao.exceptions.FilterValidationException;
 import ch.heigvd.amt.prl.lab1.dao.exceptions.NoResultException;
 import ch.heigvd.amt.prl.lab1.dao.exceptions.NonUniqueResultException;
 import ch.heigvd.amt.prl.lab1.dao.exceptions.QueryException;
+import ch.heigvd.amt.prl.lab1.dao.filtering.Filter;
+import ch.heigvd.amt.prl.lab1.dao.filtering.FilterUtils;
 import ch.heigvd.amt.prl.lab1.models.IModel;
+import ch.heigvd.amt.prl.lab1.utils.StringUtils;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -100,6 +104,57 @@ public abstract class AbstractJdbc<T extends IModel> {
   }
   
   /**
+   * Execute a read query (select) with the given parameters and an additional dynamic filter.
+   * 
+   * The result set is expected to return 0 or more records.
+   * 
+   * @param query The query
+   * @param filter the filter to add to the query
+   * @param params The parameters of the query
+   * @return The result set from the database
+   */
+  protected List<T> executeReadQuery(String query, Filter filter, Object ... params) {
+    // We enforce the presence of a filter when this method is used
+    if (filter == null) {
+      throw new IllegalArgumentException("The filter cannot be null");
+    }
+    
+    // Check the filter
+    boolean absentValue = StringUtils.isEmpty(filter.getValue());
+    boolean invalidFieldName = !FilterUtils.isFilterNameValid(filter);
+    
+    if (absentValue || invalidFieldName) {
+      throw new FilterValidationException(invalidFieldName, absentValue, filter);
+    }
+    
+    // Make sure we add WHERE or AND in the appropriate situation
+    String completeQuery = query.toLowerCase();
+    if (completeQuery.contains("where")) {
+      completeQuery += " and ";
+    }
+    else {
+      completeQuery += " where ";
+    }
+    
+    // Add the filter through the prepared statement mechanism
+    completeQuery +=  FilterUtils.getCorrespondingDbFieldName(filter) + " like ?";
+
+    // Setup the connection and prepare the query
+    try (Connection connection = dataSource.getConnection(); 
+      PreparedStatement stmt = configureStatement(connection.prepareStatement(completeQuery), params)) {
+
+      // We set the value of the filter (% is a wildcard in SQL not only MySQL)
+      // Notice: the +1 is because the statement parameters starts at index 1
+      stmt.setString(params.length + 1, "%" + filter.getValue() + "%");
+      
+      // Execute the query and return the results
+      return readList(stmt.executeQuery());
+    } catch (SQLException sqle) {
+      throw new QueryException(sqle);
+    }
+  }
+  
+  /**
    * Execute a read query (select) with the given parameters.
    * 
    * The result set is expected to have only one record returned.
@@ -161,6 +216,7 @@ public abstract class AbstractJdbc<T extends IModel> {
   private PreparedStatement configureStatement(PreparedStatement stmt, Object ... params) throws SQLException {
     // We set the parameters in the received order
     for (int i = 1; i <= params.length; i++) {
+      // Notice: the -1 is because the statement parameters starts at index 1
       stmt.setObject(i, params[i - 1]);
     }
     

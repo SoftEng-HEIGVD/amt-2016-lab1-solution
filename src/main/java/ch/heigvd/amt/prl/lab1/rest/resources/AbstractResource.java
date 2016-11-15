@@ -13,9 +13,15 @@ import javax.ws.rs.core.UriInfo;
  */
 public abstract class AbstractResource {
   /**
+   * Query parameter names
+   */
+  public static final String QUERY_PARAM_FIELD_NAME = "fieldName";
+  public static final String QUERY_PARAM_FIELD_VALUE = "fieldValue";
+  
+  /**
    * HTTP Status for validation errors
    */
-  private static final int UNPROCESSABLE_ENTITY = 422;
+  public static final int UNPROCESSABLE_ENTITY = 422;
   
   @Context
   private UriInfo uriInfo;

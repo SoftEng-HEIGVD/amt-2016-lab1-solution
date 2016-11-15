@@ -19,7 +19,7 @@
 							"",
 							"var data = JSON.parse(responseBody);",
 							"",
-							"var userRegexp = /(.*)-(\\d)/;",
+							"var userRegexp = /(.*)-(\\d+)/;",
 							"",
 							"// This will be used to make all the test working independently if there is data or not on the tested environment",
 							"var usernameSuffix = 1;",
@@ -159,7 +159,7 @@
 					"mode": "raw",
 					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
 				},
-				"description": "Get all users"
+				"description": "Get the list of users"
 			},
 			"response": []
 		},
@@ -640,7 +640,10 @@
 						"type": "text/javascript",
 						"exec": [
 							"tests[\"Status code is 404\"] = responseCode.code === 404;",
-							""
+							"",
+							"postman.setGlobalVariable(\"numberOfGeneratedUsers\", 0);",
+							"",
+							"postman.setNextRequest(\"createNewValidUsers\");"
 						]
 					}
 				},
@@ -663,6 +666,287 @@
 					"formdata": []
 				},
 				"description": "Try to delete a user that was just deleted."
+			},
+			"response": []
+		},
+		{
+			"name": "createNewValidUsers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 201\"] = responseCode.code === 201;",
+							"tests[\"Location is present\"] = responseHeaders.hasOwnProperty(\"Location\");",
+							"",
+							"var numberOfAdditionalUsers = parseInt(postman.getGlobalVariable(\"numberOfAdditionalUsers\"));",
+							"var numberOfGeneratedUsers = postman.getGlobalVariable(\"numberOfGeneratedUsers\");",
+							"",
+							"if (numberOfGeneratedUsers < numberOfAdditionalUsers) {",
+							"    postman.setNextRequest(\"createNewValidUsers\");",
+							"}",
+							"else {",
+							"    postman.setNextRequest(\"countTheNumberOfUsers\");",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var usernames = [ \"alfred\", \"bob\", \"alice\", \"eve\", \"charlie\", \"dave\" ];",
+							"",
+							"var numberOfUserGenerated = postman.getGlobalVariable(\"numberOfGeneratedUsers\");",
+							"",
+							"var username = usernames[numberOfUserGenerated % usernames.length];",
+							"",
+							"postman.setGlobalVariable(\"validUsername\", username + \"-\" + postman.getGlobalVariable(\"usernameSuffix\") + \"-\" + numberOfUserGenerated);",
+							"",
+							"postman.setGlobalVariable(\"validFirstname\", username.charAt(0).toUpperCase() + username.slice(1));",
+							"",
+							"var lastname = username.split(\"\").reverse().join(\"\");",
+							"postman.setGlobalVariable(\"validLastname\", lastname.charAt(0).toUpperCase() + lastname.slice(1));",
+							"",
+							"numberOfUserGenerated++;",
+							"",
+							"postman.setGlobalVariable(\"numberOfUserGenerated\", numberOfUserGenerated);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"{{validUsername}}\",\n\t\"firstname\": \"{{validFirstname}}\",\n\t\"lastname\": \"{{validLastname}}\",\n\t\"password\": \"test\",\n\t\"passwordConfirmation\": \"test\"\n}"
+				},
+				"description": "Create new valid users"
+			},
+			"response": []
+		},
+		{
+			"name": "countTheNumberOfUsers",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"postman.setGlobalVariable(\"totalOfUsers\", data.length);",
+							"",
+							"postman.setNextRequest(\"filterByUsername\");",
+							""
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users/",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
+				},
+				"description": "Keep track of the number of users to know if the filtering return less results than the total"
+			},
+			"response": []
+		},
+		{
+			"name": "filterByUsername",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"The number of filtered usered should be less than the total of users\"] = data.length < postman.getGlobalVariable(\"totalOfUsers\");",
+							"",
+							"var filteringIsValid = true;",
+							"for (var i = 0; i < data.length; i++) {",
+							"    if (!data[i].username.startsWith(\"alice\")) {",
+							"        filteringIsInvalid = false;",
+							"        break;",
+							"    }",
+							"}",
+							"",
+							"tests[\"The list of users contains only usernames starting with alice\"] = filteringIsValid;",
+							"",
+							"postman.setNextRequest(\"filterByFirstname\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users?fieldName=username&fieldValue=alice",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
+				},
+				"description": "Get users filtered by their username"
+			},
+			"response": []
+		},
+		{
+			"name": "filterByFirstname",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"The number of filtered usered should be less than the total of users\"] = data.length < postman.getGlobalVariable(\"totalOfUsers\");",
+							"",
+							"var filteringIsValid = true;",
+							"for (var i = 0; i < data.length; i++) {",
+							"    if (!data[i].firstname.startsWith(\"cha\")) {",
+							"        filteringIsInvalid = false;",
+							"        break;",
+							"    }",
+							"}",
+							"",
+							"tests[\"The list of users contains only firstnames starting with cha\"] = filteringIsValid;",
+							"",
+							"postman.setNextRequest(\"filterByLastname\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users?fieldName=firstname&fieldValue=cha",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
+				},
+				"description": "Get users filtered by their firstname"
+			},
+			"response": []
+		},
+		{
+			"name": "filterByLastname",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"The number of filtered usered should be less than the total of users\"] = data.length < postman.getGlobalVariable(\"totalOfUsers\");",
+							"",
+							"var filteringIsValid = true;",
+							"for (var i = 0; i < data.length; i++) {",
+							"    if (!data[i].lastname.startsWith(\"eva\")) {",
+							"        filteringIsInvalid = false;",
+							"        break;",
+							"    }",
+							"}",
+							"",
+							"tests[\"The list of users contains only lastnames starting with eva\"] = filteringIsValid;",
+							"",
+							"postman.setNextRequest(\"invalidFiltering\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users?fieldName=lastname&fieldValue=eva",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
+				},
+				"description": "Get users filtered by their lastname"
+			},
+			"response": []
+		},
+		{
+			"name": "invalidFiltering",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 422\"] = responseCode.code === 422;",
+							"",
+							"var data = JSON.parse(responseBody);",
+							"",
+							"tests[\"error for field name should be present\"] = data.fieldName;",
+							"tests[\"error for field value should be present\"] = data.fieldValue;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "http://{{host}}:{{port}}/{{contextRoot}}/api/users?fieldName=unknown&fieldValue=",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"a\",\n\t\"password\": \"a\"\n}"
+				},
+				"description": "The filter query params are not valid."
 			},
 			"response": []
 		}

@@ -3,13 +3,43 @@ description: The collection of <<humanName | !pluralize>>.
 
 get:
   description: |
-    Get all <<humanName | !pluralize>>
+    Get all <<humanName | !pluralize>>.
+
+    You can use the `fieldName` and `fieldValue` to filter the list of users by `username`, `firstname` or
+    `lastname`. The `fieldValue` is used to retrieve all the user with the value contained in the specified
+    field.
+  queryParameters:
+    fieldName:
+      displayName: Field name
+      description: |
+        Field name used to filter the data.
+
+        When used, should be set with fieldValue.
+      required: false
+      type: string
+      example: |
+        `fieldName=username`
+    fieldValue:
+      displayName: Field value
+      description: |
+        Field value used to filter the data.
+
+        When used, should be set with fieldName.
+      required: false
+      type: string
+      example: |
+        `fieldValue=hdup`
   responses:
     200:
       description: List of <<humanName>> or empty list `[]`.
       body:
         schema: <<schemaBaseName>>-getAll
         example: <<exampleGetResponse>>
+    422:
+      description: Query parameters are invalid
+      body:
+        schema: errors
+        example: <<exampleGetError>>
 
 post:
   description: Create a new <<humanName>>
